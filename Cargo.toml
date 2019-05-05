@@ -5,3 +5,4 @@ authors = ["Kevin <068ant@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+ncurses = "^5.*"
