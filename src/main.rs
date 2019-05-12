@@ -1,26 +1,37 @@
 extern crate ncurses;
 
 use ncurses::*;
-use std::char;
-use std::string;
-use std::convert::TryFrom;
-use std::io::prelude::*;
+
+const CTRL_D: i32 = 4;
 
 fn main() {
-    let mut stdin = std::io::stdin();
-
+    /* track the cursor position using these variables */
+    let mut x: i32 = 0;
+    let mut y: i32 = 0;
+    /* initialise the default screen stdscr */
     initscr();
+    raw();
     keypad(stdscr(),true);
     noecho();
-    for i in 0..10 {
+    /* main window loop */
+    loop {
         let c = getch();
-        // addch implicitly calls refresh which is not confusing at all.
-        addch(c as u64);
+        if c == CTRL_D {
+            break;
+        } else if c == KEY_BACKSPACE {
+            if x == 0 {
+                mvdelch(y-1,COLS()-1);
+            } else {
+                mvdelch(y,x-1);
+            }
+            getyx(stdscr(),&mut y, &mut x);
+        } else {
+            addch(c as chtype);
+            getyx(stdscr(),&mut y,&mut x);
+        }
+        refresh();
     }
-    let _ = stdin.read(&mut [0u8]).unwrap(); 
-    // Here we can see that an explicit call to refresh is required.
-    refresh();
-    let _ = stdin.read(&mut [0u8]).unwrap();
+    /* clean up before returning an exit code */
     endwin();
     std::process::exit(0);
 }
